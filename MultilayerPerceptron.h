@@ -1,3 +1,4 @@
+#pragma once
 #include <vector>
 #include <random>
 #include <cmath>
@@ -8,19 +9,22 @@ public:
     MultilayerPerceptron(int input_neurons, int hidden_neurons, int output_neurons)
         : input_neurons(input_neurons), hidden_neurons(hidden_neurons), output_neurons(output_neurons)
     {
-        // ----------------- MULTILAYER PERCEPTRON (MLP) -------------------
-        // Resize the mlp vector to hold the layers: input, hidden, and output
-        mlp.resize(2 + hidden_neurons);
-        mlp[0].resize(input_neurons, 0);
-        mlp.back().resize(output_neurons, 0);
+        /* ----------------- MULTILAYER PERCEPTRON (MLP) ------------------- */
+        
+        // Resize the mlp vector to hold the layers: input, hidden, and output 
+        mlp.resize(4); // 4 layers
+        
+        // Input layer
+        mlp[0].resize(input_neurons); // 1 bias, 2 inputs (x,y coordinates)
 
-        for (auto &layer : mlp)
-        {
-            if (&layer != &mlp[0] && &layer != &mlp.back())
-            {
-                layer.resize(hidden_neurons + 1, 0); // Resize the hidden layers to include biases (hidden_neurons + 1)
-            }
-        }
+        // Hidden layer
+        mlp[1].resize(hidden_neurons + 1, 0); // bias + hidden neurons
+
+        // Hidden layer
+        mlp[2].resize(hidden_neurons + 1, 0);
+
+        // Output layer
+        mlp[3].resize(output_neurons, 0);
 
         // Visual representation of the neural network structure: (Initialized with zeros)
         // 0 0 0 --> input layer (bias, x, y)
@@ -28,7 +32,8 @@ public:
         // 0 0 0 --> hidden layer
         // 0 0 0 --> output layer (r, g, b)
 
-        // ------------------------ WEIGHTS -----------------------
+        /* ------------------------ WEIGHTS ----------------------- */
+        
         // Resize the weights vector to hold the weight matrices between layers
         weights.resize(mlp.size() - 1);
 
@@ -53,7 +58,8 @@ public:
             }
         }
 
-        // --------------------- ERRORS ------------------------
+        /* --------------------- ERRORS ------------------------ */
+
         // Reserve memory for the errors vector based on the weight matrices
         errors.reserve(weights.size());
         for (const auto &layer : weights)
@@ -75,7 +81,7 @@ public:
 private:
 
     const float learning_rate = 0.1;
-    std::vector<std::vector<float>> mlp;
+    std::vector<std::vector<float>> mlp; // multilayer perceptron
     std::vector<std::vector<std::vector<float>>> weights;
     std::vector<std::vector<float>> errors;
 
