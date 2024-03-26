@@ -16,10 +16,10 @@ My final project for the Supervised Neural Networks course. This C++ project imp
 3. **Output Layer:**
    - Three outputs representing RGB colors (Red, Green, Blue).
 
-<img src="https://github.com/21zasker/Supervised-Neural-Network/blob/main/Screenshots/neural-network.jpg" width="50%" alt="Neural-Network">
+<img src="https://github.com/21zasker/Supervised-Neural-Network/blob/main/Screenshots/neural-network.jpg" width="60%" alt="Neural-Network">
 
 ## Showcase
-<img src="https://github.com/21zasker/Supervised-Neural-Network/blob/main/Screenshots/showcase.gif" width="45%" alt="Showcase">
+<img src="https://github.com/21zasker/Supervised-Neural-Network/blob/main/Screenshots/showcase.gif" width="60%" alt="Showcase">
 
 ## Note
 The program is designed for demonstration purposes and may require further optimization for practical use cases.
