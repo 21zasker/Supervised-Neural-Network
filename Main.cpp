@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include "MultilayerPerceptron.h"
+#include "Canvas.h"
 
 int main()
 {
@@ -12,10 +13,10 @@ int main()
 	int hidden_neurons = 2; // 2 hidden layers with 2 neurons each
 	int output_neurons = 3; // 3 outputs (r, g, b) for RGB colors
 
-	// ----------------- NEURAL NETWORK -------------------
+	// Neural network
 	MultilayerPerceptron perceptron(input_neurons, hidden_neurons, output_neurons);
 
-	// ------------------------- WINDOW -------------------------
+	// Window
 	sf::RenderWindow window(sf::VideoMode(2 * 512, 512), "Final Project - Neural Networks", sf::Style::Close);
 
 	// Mouse
@@ -29,64 +30,12 @@ int main()
 	dot_shape.setOutlineColor(sf::Color(0, 0, 0));
 	dot_shape.setOutlineThickness(1);
 
-	// ----------------------- Canvas for inputs ---------------------
-	sf::Image outputs_image;
-	outputs_image.create(64, 64);
+	// Canvas and UI
+	Canvas canvas;
 
-	sf::Texture outputs_texture;
-	outputs_texture.loadFromImage(outputs_image);
-
-	sf::Sprite outputs_sprite;
-	outputs_sprite.setPosition(512, 0);
-	outputs_sprite.setScale(512 / 64, 512 / 64);
-	outputs_sprite.setTexture(outputs_texture);
-
-	// ---------------------- User Interface ----------------------
-	// Title
-	sf::Font font;
-	font.loadFromFile("Sources/PressStart2P.ttf");
-	sf::Text title("Neural Networks", font, 24);
-	title.setFillColor(sf::Color::Black);
-	title.setPosition(20, 30);
-
-	// Color wheel
-	sf::Texture texture_wheel;
-	texture_wheel.loadFromFile("Sources/color_wheel.png");
-	sf::Sprite sprite_wheel(texture_wheel);
-	sprite_wheel.setPosition(390, 50);
-	sprite_wheel.setScale(0.1f, 0.1f);
-
-	// Instructions
-	sf::Text instr("Press the key:", font, 21);
-	instr.setFillColor(sf::Color::Black);
-	instr.setPosition(20, 130);
-
-	sf::Texture texture_keys;
-	texture_keys.loadFromFile("Sources/rgb_keys.png");
-	sf::Sprite sprite_keys(texture_keys);
-	sprite_keys.setPosition(20, 180);
-	sprite_keys.setScale(0.8f, 0.8f);
-
-	sf::Text instr1("for Red", font, 19);
-	instr1.setFillColor(sf::Color::Red);
-	instr1.setPosition(90, 205);
-
-	sf::Text instr2("for Green", font, 19);
-	instr2.setFillColor(sf::Color(0, 188, 0));
-	instr2.setPosition(90, 265);
-
-	sf::Text instr3("for Blue", font, 19);
-	instr3.setFillColor(sf::Color::Blue);
-	instr3.setPosition(90, 330);
-
-	sf::Text start("> Start", font, 21);
-	start.setFillColor(sf::Color::Black);
-	start.setPosition(320, 430);
-
-	// -------------------- MAIN PROGRAM ------------------
 	while (1 == window.isOpen())
 	{
-		// ------------- EVENTS --------------
+		// Events
 		sf::Event event;
 		while (1 == window.pollEvent(event))
 		{
@@ -103,34 +52,29 @@ int main()
 			{
 				switch (event.key.code)
 				{
-				case sf::Keyboard::R:
-				{
-					cursor.setFillColor(sf::Color::Red);
+				case Keyboard::R:
+					cursor.setFillColor(Color::Red);
 					break;
-				}
-				case sf::Keyboard::G:
-				{
-					cursor.setFillColor(sf::Color::Green);
+				case Keyboard::G:
+					cursor.setFillColor(Color::Green);
 					break;
-				}
-				case sf::Keyboard::B:
-				{
-					cursor.setFillColor(sf::Color::Blue);
+				case Keyboard::B:
+					cursor.setFillColor(Color::Blue);
 					break;
-				}
 				}
 			// Add inputs for 'X' and outputs for 'y' based on mouse coordinates and cursor color
 			case sf::Event::MouseButtonPressed:
 			{
-				switch (event.mouseButton.button)
-				{
-				case sf::Mouse::Left:
+				if (event.mouseButton.button == sf::Mouse::Left)
 				{
 					// Mouse position
 					sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
 
 					// Canvas bounds (outputs_sprite)
-					sf::FloatRect spriteBounds = outputs_sprite.getGlobalBounds();
+					sf::FloatRect spriteBounds = canvas.outputs_sprite.getGlobalBounds();
+
+					// Start button bounds
+					sf::FloatRect startBounds = canvas.start_text.getGlobalBounds();
 
 					// Check if the 'click' is inside the canvas
 					if (spriteBounds.contains(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y)))
@@ -157,23 +101,20 @@ int main()
 							y.push_back({0, 0, 1}); // Blue
 						}
 					}
+
+					// Check if the 'click' is on the start button
+					if (startBounds.contains(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y)))
+					{
+						train = true; // Start the perceptron
+						cursor.setFillColor(sf::Color::Transparent);
+					}
 				}
-				}
 			}
 			}
 			}
-			// -------------- LOOP EXECUTION ---------------
 
 			// Cursor follows the mouse position
-			sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
-			cursor.setPosition(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y));
-
-			// Event Handler to start the multilayer perceptron
-			if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && start.getGlobalBounds().contains(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y)))
-			{
-				train = true;
-				cursor.setFillColor(sf::Color::Transparent);
-			}
+			cursor.setPosition(static_cast<float>(sf::Mouse::getPosition(window).x), static_cast<float>(sf::Mouse::getPosition(window).y));
 
 			// Start training the multilayer perceptron
 			if (train)
@@ -189,8 +130,7 @@ int main()
 				}
 			}
 
-			// ------------------- SCREEN RENDERING -----------------
-
+			// Window render
 			window.clear(sf::Color::White);
 
 			// Loop through the canvas and add coordinates to the neural network for testing
@@ -205,21 +145,12 @@ int main()
 					std::vector<float> output_color = perceptron.forward_propagation({1, input_1, input_2});
 
 					// Update the canvas color with the obtained output (color)
-					outputs_image.setPixel(i, j, sf::Color(round(255 * output_color[0]), round(255 * output_color[1]), round(255 * output_color[2])));
+					canvas.outputs_image.setPixel(i, j, sf::Color(round(255 * output_color[0]), round(255 * output_color[1]), round(255 * output_color[2])));
 				}
 			}
 
-			outputs_texture.update(outputs_image);
-			window.draw(outputs_sprite);
-
-			window.draw(title);
-			window.draw(sprite_wheel);
-			window.draw(instr);
-			window.draw(instr1);
-			window.draw(instr2);
-			window.draw(instr3);
-			window.draw(start);
-			window.draw(sprite_keys);
+			canvas.outputs_texture.update(canvas.outputs_image);
+			canvas.drawCanvas(window);
 			window.draw(cursor);
 
 			// Render dots on the canvas
